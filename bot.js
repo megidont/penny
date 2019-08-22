@@ -158,7 +158,7 @@ bot.on('message', function(message){
 
 			var locchannelName = submess;
 
-			if(server.channels.find(channel => channel.name == locchannelName) == undefined){
+			if(server.channels.find(channel => channel.name == locchannelName) == undefined && (server.roles.find(role => role.name === "Community Pins") != undefined)){
 				server.createChannel(locchannelName, {
 
 					type: 'text',
@@ -287,7 +287,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		}
 
-		if(server.channels.find(channel => channel.name == locchannelName) == undefined){
+		if(server.channels.find(channel => channel.name == locchannelName) == undefined && (server.roles.find(role => role.name === "Community Pins") != undefined)){
 			server.createChannel(locchannelName, {
 
 				type: 'text',
