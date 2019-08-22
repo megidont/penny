@@ -1,7 +1,16 @@
 var Discord = require('discord.js');
 var auth = require('./auth.json');
 var fs = require('fs');
-var customChannels = require('./channels.json');
+var customChannels;
+try{
+
+	customChannels = require('./channels.json');
+
+}catch(e){
+
+	customChannels = {};
+
+}
 
 var bot = new Discord.Client();
 
