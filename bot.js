@@ -64,7 +64,7 @@ bot.on('message', function(message){
 
 		}
 
-		var perms = message.member.permissions;
+		var perms = message.member? message.member.permissions : new Map();
 
 		var a = message.content.toLowerCase().split(" ");
 		var server = message.guild;
@@ -115,7 +115,14 @@ bot.on('message', function(message){
 
 			}else{
 
-				if(!perms.has("MANAGE_GUILD") || !perms.has("MANAGE_CHANNELS")){
+				if(perms.size == 0){
+
+					message.channel.send("<@" + message.author.id + ">, for some reason I couldn't find your permissions. You may want to talk to my author about this - it's a bit of a pesky bug!");
+					return;
+
+				}
+
+				else if(!perms.has("MANAGE_GUILD") || !perms.has("MANAGE_CHANNELS")){
 
 					if(ciel == true){
 
@@ -317,8 +324,8 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		}
 
-		var goodName = messageReaction.message.member.nickname ? messageReaction.message.member.nickname : messageReaction.message.author.username;
-		var color = messageReaction.message.member.displayColor;
+		var goodName = messageReaction.message.member ? (messageReaction.message.member.nickname ? messageReaction.message.member.nickname : messageReaction.message.author.username) : "Unable to determine nickname";
+		var color = messageReaction.message.member? messageReaction.message.member.displayColor : 0;
 		var color = color == 0? 0x882299 : color;
 
 		var dlTitle = false;
