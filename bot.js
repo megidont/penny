@@ -1,3 +1,4 @@
+/*jshint esversion: 8*/
 var Discord = require('discord.js');
 var auth = require('./auth.json');
 var fs = require('fs');
@@ -170,7 +171,7 @@ bot.on('message', function(message){
 		if(makechannel == true){
 
 			customChannels[message.guild.id] = submess;
-			fs.writeFile('./channels.json', JSON.stringify(customChannels), 'utf8', function (err){if(err != null){console.log(err)}});
+			fs.writeFile('./channels.json', JSON.stringify(customChannels), 'utf8', function (err){if(err != null){console.log(err);}});
 
 			var locchannelName = submess;
 
@@ -326,7 +327,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		var goodName = messageReaction.message.member ? (messageReaction.message.member.nickname ? messageReaction.message.member.nickname : messageReaction.message.author.username) : "Unable to determine nickname";
 		var color = messageReaction.message.member? messageReaction.message.member.displayColor : 0;
-		var color = color == 0? 0x882299 : color;
+		color = color == 0? 0x882299 : color;
 
 		var dlTitle = false;
 		var dlURL = false;
@@ -343,7 +344,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 		if(messageReaction.message.attachments.first() != undefined){
 
 			var filename = messageReaction.message.attachments.first().filename;
-			var tempfilenamepart = filename.split('.')
+			var tempfilenamepart = filename.split('.');
 			var ext = tempfilenamepart[tempfilenamepart.length - 1].toLowerCase();
 			var spaceFileName = filename.replace(/_/g, " ");
 
@@ -363,11 +364,11 @@ bot.on('messageReactionAdd', function(messageReaction){
 		}
 		if(messageReaction.message.embeds[0] != undefined){
 
-			var embed = messageReaction.message.embeds[0];
+			let embed = messageReaction.message.embeds[0];
 
 			if(dlTitle || embed.title){
 
-				var newMessage = new Discord.RichEmbed(embed)
+				let newMessage = new Discord.RichEmbed(embed)
 					.setTitle(dlTitle? dlTitle : (embed.title? embed.title : undefined))
 					.setURL(dlURL? dlURL : embed.url)
 					.setImage(dlImage? dlImage : (embed.image? embed.image.url : null))
@@ -378,7 +379,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 			}else{
 
-				var newMessage = new Discord.RichEmbed(embed)
+				let newMessage = new Discord.RichEmbed(embed)
 					.setURL(dlURL? dlURL : embed.url)
 					.setImage(dlImage? dlImage : (embed.image? embed.image.url : null))
 					.setAuthor(goodName, messageReaction.message.author.avatarURL, embed.url? embed.url : (embed.author? (embed.author.url? embed.author.url : (dlURL? postlink : postlink)) : postlink ))
@@ -392,7 +393,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 
 			if(dlTitle){
-				var newMessage = new Discord.RichEmbed()
+				let newMessage = new Discord.RichEmbed()
 					.setColor(color)
 					.setTitle(dlTitle)
 					.setURL(dlURL)
@@ -404,7 +405,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 			}else{
 
-				var newMessage = new Discord.RichEmbed()
+				let newMessage = new Discord.RichEmbed()
 					.setColor(color)
 					.setURL(postlink)
 					.setAuthor(goodName, messageReaction.message.author.avatarURL, postlink)
@@ -424,6 +425,6 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 	}
 
-})
+});
 
 bot.login(auth.token);
