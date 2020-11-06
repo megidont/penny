@@ -13,7 +13,7 @@ try{
 
 }
 
-var bot = new Discord.Client();
+var bot = new Discord.Client({partials: ['MESSAGE', 'CHANNEL', 'REACTION']});
 
 var ciel = false;
 
@@ -42,7 +42,7 @@ bot.once('ready', function(evt){
 
 });
 
-bot.on('message', function(message){
+bot.on('message', async (message) => {
 
 	var at = "<@" + bot.user.id + ">";
 	var nickat = "<@!" + bot.user.id + ">";
@@ -65,7 +65,9 @@ bot.on('message', function(message){
 
 		}
 
-		var perms = message.member? message.member.permissions : new Map();
+		var forceMember = await message.member.fetch(true);
+		var perms = forceMember.permissionsIn(message.channel);
+//		var perms = message.member? message.member.permissions : new Map();
 
 		var a = message.content.toLowerCase().split(" ");
 		var server = message.guild;
@@ -200,7 +202,8 @@ bot.on('message', function(message){
 
 });
 
-bot.on('raw', async event => {
+//Old way of doing partials, rejoice, out with the old in with the new
+/*bot.on('raw', async event => {
 
 
 	if(!events.hasOwnProperty(event.t)){
@@ -232,7 +235,7 @@ bot.on('raw', async event => {
 		return;
 
 	}*/
-
+/*
 	if(channel.messages.cache.has(data.message_id)){
 
 		return;
@@ -256,7 +259,7 @@ bot.on('raw', async event => {
 
 	bot.emit(events[event.t], reaction, user);
 
-});
+});*/
 
 bot.on('guildCreate', function(guild){
 
@@ -279,8 +282,19 @@ bot.on('guildCreate', function(guild){
 
 });
 
-bot.on('messageReactionAdd', function(messageReaction){
+bot.on('messageReactionAdd', async (messageReaction) => {
 
+	if(messageReaction.partial){
+
+		try{
+
+			await messageReaction.fetch();
+
+		}catch(error){
+			return;
+		}
+
+	}
 
 	var emoji = messageReaction.emoji.identifier;
 	var server = messageReaction.message.guild;
@@ -323,7 +337,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		}
 
-		var goodName = messageReaction.message.member ? (messageReaction.message.member.nickname ? messageReaction.message.member.nickname : messageReaction.message.author.username) : "Unable to determine nickname";
+		var goodName = messageReaction.message.member ? (messageReaction.message.member.nickname ? messageReaction.message.member.nickname : messageReaction.message.author.username) : (messageReaction.message.author? messageReaction.message.author.username : "Unable to determine nickname");
 		var color = messageReaction.message.member? messageReaction.message.member.displayColor : 0;
 		color = color == 0? 0x882299 : color;
 
