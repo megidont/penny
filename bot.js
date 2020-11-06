@@ -86,7 +86,7 @@ bot.on('message', function(message){
 					}else{
 
 						var chanid = a[i].match(/\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d/);
-						submess = server.channels.get(chanid[0]).name;
+						submess = server.channels.cache.get(chanid[0]).name;
 						break;
 
 					}
@@ -121,9 +121,7 @@ bot.on('message', function(message){
 					message.channel.send("<@" + message.author.id + ">, for some reason I couldn't find your permissions. You may want to talk to my author about this - it's a bit of a pesky bug!");
 					return;
 
-				}
-
-				else if(!perms.has("MANAGE_GUILD") || !perms.has("MANAGE_CHANNELS")){
+				}else if(!perms.has("MANAGE_GUILD") || !perms.has("MANAGE_CHANNELS")){
 
 					if(ciel == true){
 
@@ -175,7 +173,7 @@ bot.on('message', function(message){
 
 			var locchannelName = submess;
 
-			if(server.channels.find(channel => channel.name == locchannelName) == undefined && (server.roles.find(role => role.name === "Community Pins") != undefined)){
+			if(server.channels.cache.find(channel => channel.name == locchannelName) == undefined && (server.roles.cache.find(role => role.name === "Community Pins") != undefined)){
 				server.createChannel(locchannelName, {
 
 					type: 'text',
@@ -187,7 +185,7 @@ bot.on('message', function(message){
 
 					}, {
 
-						id: server.roles.find(role => role.name === "Community Pins").id,
+						id: server.roles.cache.find(role => role.name === "Community Pins").id,
 						allow: ['SEND_MESSAGES', 'MANAGE_MESSAGES']
 
 					}]
@@ -227,7 +225,7 @@ bot.on('raw', async event => {
 
 	}
 
-	var channel = bot.channels.get(data.channel_id) || await user.createDM();
+	var channel = bot.channels.cache.get(data.channel_id) || await user.createDM();
 
 /*	if(channel.name == locchannelName){
 
@@ -235,23 +233,23 @@ bot.on('raw', async event => {
 
 	}*/
 
-	if(channel.messages.has(data.message_id)){
+	if(channel.messages.cache.has(data.message_id)){
 
 		return;
 
 	}
 
-	var user = bot.users.get(data.user_id);
+	var user = bot.users.cache.get(data.user_id);
 
-	var message = await channel.fetchMessage(data.message_id);
+	var message = await channel.messages.fetch(data.message_id);
 
 	var emojiKey = data.emoji.id ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
 
-	var reaction = message.reactions.get(emojiKey);
+	var reaction = message.reactions.cache.get(emojiKey);
 
 	if(!reaction){
 
-		var emoji = new Discord.Emoji(bot.guilds.get(data.guild_id), data.emoji);
+		var emoji = new Discord.Emoji(bot.guilds.cache.get(data.guild_id), data.emoji);
 		reaction = new Discord.MessageReaction(message, emoji, 1, data.user_id == bot.user.id);
 
 	}
@@ -262,16 +260,16 @@ bot.on('raw', async event => {
 
 bot.on('guildCreate', function(guild){
 
-	if(guild.channels.find(channel => channel.name == "general") != undefined){
+	if(guild.channels.cache.find(channel => channel.name == "general") != undefined){
 
 		if(ciel == true){
 
-			guild.channels.find(channel => channel.name == "general")
+			guild.channels.cache.find(channel => channel.name == "general")
 				.send("Please use \"<@" + bot.user.id + "> usechannel [channelname]\" to specify a channel for pins.");
 
 		}else{
 
-			guild.channels.find(channel => channel.name == "general")
+			guild.channels.cache.find(channel => channel.name == "general")
 				.send("Hello! Please use \"<@" + bot.user.id + "> usechannel [channelname]\" to specify a channel for pins.");
 
 		}
@@ -304,7 +302,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		}
 
-		if(server.channels.find(channel => channel.name == locchannelName) == undefined && (server.roles.find(role => role.name === "Community Pins") != undefined)){
+		if(server.channels.cache.find(channel => channel.name == locchannelName) == undefined && (server.roles.cache.find(role => role.name === "Community Pins") != undefined)){
 			server.createChannel(locchannelName, {
 
 				type: 'text',
@@ -316,7 +314,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 				}, {
 
-					id: server.roles.find(role => role.name === "Community Pins").id,
+					id: server.roles.cache.find(role => role.name === "Community Pins").id,
 					allow: ['SEND_MESSAGES', 'MANAGE_MESSAGES']
 
 				}]
@@ -332,6 +330,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 		var dlTitle = false;
 		var dlURL = false;
 		var dlImage = false;
+		var newMessage = null;
 
 		var msginfo = goodName + " - "
 			+ (messageReaction.message.channel? "#" + messageReaction.message.channel.name : "");
@@ -368,7 +367,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 			if(dlTitle || embed.title){
 
-				let newMessage = new Discord.RichEmbed(embed)
+				newMessage = new Discord.MessageEmbed(embed)
 					.setTitle(dlTitle? dlTitle : (embed.title? embed.title : undefined))
 					.setURL(dlURL? dlURL : embed.url)
 					.setImage(dlImage? dlImage : (embed.image? embed.image.url : null))
@@ -379,7 +378,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 			}else{
 
-				let newMessage = new Discord.RichEmbed(embed)
+				newMessage = new Discord.MessageEmbed(embed)
 					.setURL(dlURL? dlURL : embed.url)
 					.setImage(dlImage? dlImage : (embed.image? embed.image.url : null))
 					.setAuthor(goodName, messageReaction.message.author.avatarURL, embed.url? embed.url : (embed.author? (embed.author.url? embed.author.url : (dlURL? postlink : postlink)) : postlink ))
@@ -393,7 +392,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 
 			if(dlTitle){
-				let newMessage = new Discord.RichEmbed()
+				newMessage = new Discord.MessageEmbed()
 					.setColor(color)
 					.setTitle(dlTitle)
 					.setURL(dlURL)
@@ -405,7 +404,7 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 			}else{
 
-				let newMessage = new Discord.RichEmbed()
+				newMessage = new Discord.MessageEmbed()
 					.setColor(color)
 					.setURL(postlink)
 					.setAuthor(goodName, messageReaction.message.author.avatarURL, postlink)
@@ -417,9 +416,9 @@ bot.on('messageReactionAdd', function(messageReaction){
 
 		}
 
-		if(server.channels.find(channel => channel.name == locchannelName) != undefined){
+		if(server.channels.cache.find(channel => channel.name == locchannelName) != undefined){
 
-			server.channels.find(channel => channel.name == locchannelName).send({embed: newMessage == null? new Discord.RichEmbed().setDescription("whoops") : newMessage});
+			server.channels.cache.find(channel => channel.name == locchannelName).send({embed: newMessage == null? new Discord.MessageEmbed().setDescription("whoops") : newMessage});
 
 		}
 
